@@ -78,4 +78,12 @@ public class AttractionService {
         }
         return  attractionRepository.findAll();
     }
+
+    public List<Attraction> attractionOuverte(){
+
+        if(attractionRepository.getAllByEstOuverteIsTrue().isEmpty()){
+            throw new IllegalArgumentException("Malheureusement aucune attraction est ouverte !");
+        }
+        return attractionRepository.getAllByEstOuverteIsTrue();
+    }
 }

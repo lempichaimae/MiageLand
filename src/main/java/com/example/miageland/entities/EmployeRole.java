@@ -2,6 +2,13 @@ package com.example.miageland.entities;
 
 public enum EmployeRole {
 
-    Classique,
-    Administrateur
+    /**
+     * valider les billets
+     */
+    Validateur,
+
+    /**
+     * Fermer et ouvrir des attractions
+     */
+    Administrateur,
 }

@@ -10,14 +10,22 @@ import java.util.List;
 @Repository
 public interface VisiteurRepository extends JpaRepository <Visiteur,Long> {
 
-    List<Visiteur> getVisiteurById(Long id);
+   Visiteur getVisiteurById(Long id);
 
-    List<Visiteur> getVisiteurByNom(String nom);
+   Boolean existsVisiteurByEmail(String email);
 
-    List<Visiteur> getVisiteurByEmail(String email);
+    Visiteur getVisiteurByNom(String nom);
 
-    List<Visiteur> deleteVisiteurById(Long id);
+    Visiteur getVisiteurByEmail(String email);
 
-    List<Visiteur> deleteVisiteurByEmail(String email);
+    Visiteur deleteVisiteurById(Long id);
+
+    Integer deleteVisiteurByEmail(String email);
+
+    Visiteur getVisiteurByEmailAndAndNom(String nom, String email);
+
+
+
+
 
 }

@@ -2,6 +2,7 @@ package com.example.miageland.rest;
 
 import com.example.miageland.entities.Attraction;
 import com.example.miageland.entities.Employe;
+import com.example.miageland.entities.EmployeRole;
 import com.example.miageland.services.AttractionService;
 import com.example.miageland.services.EmployeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,12 @@ public class AttractionController {
             attractionService.ajouterAttraction(attraction);
             return ResponseEntity.status(HttpStatus.CREATED).body("Attraction ajoutée avec succès");
         }
+        else if (employeService.isAdmin(email) == EmployeRole.valueOf("Administrateur"))
+        {
+            attractionService.ajouterAttraction(attraction);
+            return ResponseEntity.ok("Attraction ajoutée avec succès");
+        }
+
         else {
             return ResponseEntity.status(HttpStatus.CREATED).body("Vous pouvez pas réaliser cette opération !");
         }
@@ -46,6 +53,12 @@ public class AttractionController {
     @DeleteMapping("/delete")
     public ResponseEntity<String> supprimerAttraction(@RequestParam Long id, @RequestParam String email) {
         if(employeService.findByEmail(email).isManager())
+        {
+            attractionService.supprimerAttraction(id);
+            return ResponseEntity.ok("Attraction supprimée avec succès");
+
+        }
+        else if (employeService.isAdmin(email) == EmployeRole.valueOf("Administrateur"))
         {
             attractionService.supprimerAttraction(id);
             return ResponseEntity.ok("Attraction supprimée avec succès");
@@ -59,7 +72,11 @@ public class AttractionController {
     @PostMapping("/fermer")
     public ResponseEntity<String> fermerAttraction(@RequestParam Long id,@RequestParam String email) {
         if(employeService.findByEmail(email).isManager())
-
+        {
+            attractionService.fermerAttraction(id);
+            return ResponseEntity.ok("Attraction fermée avec succès");
+        }
+        else if (employeService.isAdmin(email) == EmployeRole.valueOf("Administrateur"))
         {
             attractionService.fermerAttraction(id);
             return ResponseEntity.ok("Attraction fermée avec succès");
@@ -73,6 +90,11 @@ public class AttractionController {
     @PostMapping("/rouvrir")
     public ResponseEntity<String> rouvrirAttraction(@RequestParam Long id, @RequestParam String email) {
         if(employeService.findByEmail(email).isManager())
+        {
+            attractionService.rouvrirAttraction(id);
+            return ResponseEntity.ok("Attraction rouverte avec succès");
+        }
+        else if (employeService.isAdmin(email) == EmployeRole.valueOf("Administrateur"))
         {
             attractionService.rouvrirAttraction(id);
             return ResponseEntity.ok("Attraction rouverte avec succès");

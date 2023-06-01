@@ -18,10 +18,8 @@ public class Billet {
     @Id
     private Long numBillet;
 
+    @NotNull
     private Date date;
-
-    @NonNull
-    private long numVisiteur;
 
     @NotNull
     private double prix;

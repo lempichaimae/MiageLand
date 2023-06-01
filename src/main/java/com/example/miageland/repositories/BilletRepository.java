@@ -11,13 +11,13 @@ public interface BilletRepository extends JpaRepository <Billet, Long> {
 
     Billet getBilletByNumBillet(Long numBillet);
 
+
 //    Billet getBilletByEstValide(boolean estValide);
 
-    List<Billet> getBilletByNumVisiteur(Long numVisiteur);
 
     List<Billet> getBilletByDate(Date date);
 
-    List<Billet> deleteBilletByNumVisiteur(Long numVisiteur);
+    Billet deleteBilletByNumBillet(Long numBillet);
 
-    List<Billet> deleteBilletByNumBillet(Long numBillet);
+
 }
