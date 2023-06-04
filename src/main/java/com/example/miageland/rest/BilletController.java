@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @RestController
@@ -66,7 +67,7 @@ public class BilletController {
      * @return
      */
     @PostMapping("/reserverBillet")
-    public ResponseEntity<Map<String, Object>> reserverBillet(@RequestParam Date date, @RequestParam Long id) {
+    public ResponseEntity<Map<String, Object>> reserverBillet(@RequestParam LocalDate date, @RequestParam Long id) {
         Billet billet = billetService.reserverBillet(id, date);
 
         Map<String, Object> response = new HashMap<>();

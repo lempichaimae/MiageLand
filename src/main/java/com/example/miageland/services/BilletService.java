@@ -7,6 +7,7 @@ import com.example.miageland.repositories.VisiteurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -24,6 +25,10 @@ public class BilletService {
         this.visiteurRepository = visiteurRepository;
     }
 
+    /**
+     * Générer un prix aléatoire entre 20 et 70 euros pour le billet
+     * @return
+     */
     private double genererPrixAleatoire() {
         Random random = new Random();
         double minPrix = 20.0; // Prix minimum
@@ -38,7 +43,13 @@ public class BilletService {
         return prix;
     }
 
-    public Billet reserverBillet(Long id, Date date) {
+    /**
+     * Réserver un billet pour un visiteur
+     * @param id
+     * @param date
+     * @return
+     */
+    public Billet reserverBillet(Long id, LocalDate date) {
         // Récupérer le visiteur à partir de l'ID
         Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
 
@@ -61,6 +72,11 @@ public class BilletService {
     }
 
 
+    /**
+     * Valider un billet
+     * @param numBillet
+     * @return
+     */
     public boolean validateBillet(Long numBillet) {
         Billet billet = billetRepository.getBilletByNumBillet(numBillet);
 
@@ -87,7 +103,11 @@ public class BilletService {
         }
     }
 
-    //un visiteur récupère ses billets
+    /**
+     * Récupérer un billet à partir de son numéro
+     * @param id
+     * @return
+     */
     public List<Billet> getBilletsByVisiteur(Long id){
         Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
         return visiteur.getBillets();
@@ -100,23 +120,30 @@ public class BilletService {
      * @return
      */
     public Billet annulerBillet( Long numBillet, Long id){
-        Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+        Visiteur visiteur = visiteurRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+
         Billet billet = billetRepository.getBilletByNumBillet(numBillet);
 
         if (billet == null) {
             throw new IllegalArgumentException("Billet introuvable");
+        } else if (billet.getVisiteur().getId() != id) {
+            throw new IllegalArgumentException("Billet ne correspond pas au visiteur");
+        } else if (billet.isEstValide()) {
+            throw new IllegalArgumentException("Billet déjà utilisé");
+        } else if (!billet.isEstConfirme()) {
+            throw new IllegalArgumentException("Billet déjà annulé");
         } else {
-            if (billet.getVisiteur().getId() != id) {
-                throw new IllegalArgumentException("Billet ne correspond pas au visiteur");
-            } else if (billet.isEstValide()) {
-                throw new IllegalArgumentException("Billet déjà utilisé");
-            } else if (billet.isEstConfirme()) {
-                billet.setEstConfirme(false);
-                billetRepository.save(billet);
-                return billet;
-            } else {
-                throw new IllegalArgumentException("Billet déjà annulé");
+            LocalDate dateValidite = billet.getDate();
+            LocalDate dateAnnulationLimite = LocalDate.now().plusDays(7);
+
+            if (dateAnnulationLimite.isAfter(dateValidite)) {
+                throw new IllegalArgumentException("La période d'annulation est dépassée");
             }
+
+            billet.setEstConfirme(false);
+            billetRepository.save(billet);
+            return billet;
         }
     }
 

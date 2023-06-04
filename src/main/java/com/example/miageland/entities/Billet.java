@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -19,12 +20,11 @@ public class Billet {
     private Long numBillet;
 
     @NotNull
-    private Date date;
+    private LocalDate date;
 
     @NotNull
     private double prix;
 
-    //pour vérifier la confirmation/achat
 
     private boolean estConfirme;
 
