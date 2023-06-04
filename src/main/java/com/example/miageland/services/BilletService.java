@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class BilletService {
 
     private BilletRepository billetRepository;
+
     private VisiteurRepository visiteurRepository;
 
     @Autowired
@@ -22,13 +24,28 @@ public class BilletService {
         this.visiteurRepository = visiteurRepository;
     }
 
-    public void reserverBillet(Long id, Date date) {
+    private double genererPrixAleatoire() {
+        Random random = new Random();
+        double minPrix = 20.0; // Prix minimum
+        double maxPrix = 70.0; // Prix maximum
+
+        // Générer un prix aléatoire entre minPrix et maxPrix
+        double prix = minPrix + (maxPrix - minPrix) * random.nextDouble();
+
+        // Arrondir le prix à deux décimales
+        prix = Math.round(prix * 100.0) / 100.0;
+
+        return prix;
+    }
+
+    public Billet reserverBillet(Long id, Date date) {
         // Récupérer le visiteur à partir de l'ID
         Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
 
         // Créer un nouveau billet
         Billet billet = new Billet();
         billet.setDate(date);
+        billet.setPrix(genererPrixAleatoire());
         billet.setVisiteur(visiteur);
         billet.setEstConfirme(true);
         billet.setEstValide(false);
@@ -39,7 +56,10 @@ public class BilletService {
         // Ajouter le billet à la liste de billets du visiteur
         visiteur.getBillets().add(billet);
         visiteurRepository.save(visiteur);
+
+        return billet;
     }
+
 
     public boolean validateBillet(Long numBillet) {
         Billet billet = billetRepository.getBilletByNumBillet(numBillet);
@@ -67,21 +87,37 @@ public class BilletService {
         }
     }
 
-    public Billet creer(Billet billet){
-        billetRepository.save(billet);
-        billet.setEstValide(false);
-        billet.setEstConfirme(false);
-        return billet;
+    //un visiteur récupère ses billets
+    public List<Billet> getBilletsByVisiteur(Long id){
+        Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+        return visiteur.getBillets();
     }
 
-    public List<Billet> allBillet(Date date){
-       List<Billet> billets= billetRepository.getBilletByDate(date);
-       if(billets.isEmpty()) {
-           throw new IllegalArgumentException(" Pas de billet ");
-       }
-       else {
-           return billets;
-       }
+    /**
+     * Un visiteur annule un billet
+     * @param id
+     * @param numBillet
+     * @return
+     */
+    public Billet annulerBillet( Long numBillet, Long id){
+        Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+        Billet billet = billetRepository.getBilletByNumBillet(numBillet);
+
+        if (billet == null) {
+            throw new IllegalArgumentException("Billet introuvable");
+        } else {
+            if (billet.getVisiteur().getId() != id) {
+                throw new IllegalArgumentException("Billet ne correspond pas au visiteur");
+            } else if (billet.isEstValide()) {
+                throw new IllegalArgumentException("Billet déjà utilisé");
+            } else if (billet.isEstConfirme()) {
+                billet.setEstConfirme(false);
+                billetRepository.save(billet);
+                return billet;
+            } else {
+                throw new IllegalArgumentException("Billet déjà annulé");
+            }
+        }
     }
 
 }
