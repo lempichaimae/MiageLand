@@ -29,7 +29,7 @@ public class BilletController {
     }
 
     /**
-     * un visiteur valide son billet
+     * un employé valide son billet
      * @param numBillet
      * @return
      */
@@ -79,6 +79,21 @@ public class BilletController {
     }
 
     /**
+     * un visiteur achète un billet
+     */
+    @PostMapping("/payerBillet")
+    public ResponseEntity<Map<String, Object>> payerBillet(@RequestParam Long numBillet) {
+        Billet billet = billetService.payerBillet(numBillet);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("numBillet", billet.getNumBillet());
+        response.put("prix", billet.getPrix());
+        response.put("date", billet.getDate());
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * un visiteur récupère ses billets
      * @param id
      * @return
@@ -93,6 +108,48 @@ public class BilletController {
             billetInfo.put("numBillet", billet.getNumBillet());
             billetInfo.put("prix", billet.getPrix());
             billetInfo.put("date", billet.getDate());
+            billetsInfo.add(billetInfo);
+        }
+
+        return ResponseEntity.ok(billetsInfo);
+    }
+
+    /**
+     * un employé récupère les billets reserves d'un visiteur
+     * @param id
+     * @return
+     */
+    @GetMapping("/billetsReserves")
+    public ResponseEntity<List<Map<String, Object>>> getBilletsReservesByVisiteur(@RequestParam Long id) {
+        List<Billet> billets = billetService.getBilletsReservesByVisiteur(id);
+        List<Map<String, Object>> billetsInfo = new ArrayList<>();
+
+        for (Billet billet : billets) {
+            Map<String, Object> billetInfo = new HashMap<>();
+            billetInfo.put("numBillet", billet.getNumBillet());
+            billetInfo.put("date", billet.getDate());
+            billetsInfo.add(billetInfo);
+        }
+
+        return ResponseEntity.ok(billetsInfo);
+    }
+
+    /**
+     * un employé récupère les billets payés d'un visiteur
+     * @param id
+     * @return
+     */
+
+    @GetMapping("/billetsPayes")
+    public ResponseEntity<List<Map<String, Object>>> getBilletsPayesByVisiteur(@RequestParam Long id) {
+        List<Billet> billets = billetService.getBilletsPayesByVisiteur(id);
+        List<Map<String, Object>> billetsInfo = new ArrayList<>();
+
+        for (Billet billet : billets) {
+            Map<String, Object> billetInfo = new HashMap<>();
+            billetInfo.put("numBillet", billet.getNumBillet());
+            billetInfo.put("date", billet.getDate());
+            billetInfo.put("prix", billet.getDate());
             billetsInfo.add(billetInfo);
         }
 

@@ -1,6 +1,7 @@
 package com.example.miageland.services;
 
 import com.example.miageland.entities.Billet;
+import com.example.miageland.entities.BilletEtat;
 import com.example.miageland.entities.Visiteur;
 import com.example.miageland.repositories.BilletRepository;
 import com.example.miageland.repositories.VisiteurRepository;
@@ -44,7 +45,8 @@ public class BilletService {
     }
 
     /**
-     * Réserver un billet pour un visiteur
+     * Réserver un billet par un visiteur
+     * le prix est initialisé à 0 pour une réservation non payée
      * @param id
      * @param date
      * @return
@@ -56,10 +58,12 @@ public class BilletService {
         // Créer un nouveau billet
         Billet billet = new Billet();
         billet.setDate(date);
-        billet.setPrix(genererPrixAleatoire());
+        billet.setPrix(0.0); // Prix initialisé à 0 pour une réservation non payée
         billet.setVisiteur(visiteur);
-        billet.setEstConfirme(true);
+        //non cofirmé tant qu'il est pas payé
+        billet.setEstConfirme(false);
         billet.setEstValide(false);
+        billet.setEtat(BilletEtat.RESREVE); // Billet réservé, mais non payé
 
         // Enregistrer le billet dans la base de données
         billetRepository.save(billet);
@@ -69,6 +73,26 @@ public class BilletService {
         visiteurRepository.save(visiteur);
 
         return billet;
+    }
+
+    /**
+     * Payer un billet
+     * @param numBillet
+     * @return
+     */
+    public Billet payerBillet(Long numBillet) {
+        Billet billet = billetRepository.getBilletByNumBillet(numBillet);
+        //verifier si le billet existe et si il est déja payé
+        if (billet == null || billet.isEstConfirme()) {
+            throw new IllegalArgumentException("Billet introuvable ou déjà payé");
+        }
+        else {
+            billet.setPrix(genererPrixAleatoire());
+            billet.setEstConfirme(true);
+            billet.setEtat(BilletEtat.PAYE); // Billet payé
+            billetRepository.save(billet);
+            return billet;
+        }
     }
 
 
@@ -86,7 +110,7 @@ public class BilletService {
         }
         else {
             if (!billet.isEstConfirme()) {
-                // Le billet a été annulé
+                // Le billet a été annulé ou non payé
                 return false;
             }
             else {
@@ -147,4 +171,46 @@ public class BilletService {
         }
     }
 
+    /**
+     * Récupérer tous les billets reservés
+     * @return
+     */
+    public List<Billet> getBilletsReserves(){
+        return billetRepository.getBilletByEtat(BilletEtat.RESREVE);
+    }
+
+    /**
+     * Récupérer tous les billets payés
+     * @return
+     */
+    public List<Billet> getBilletsPayes(){
+        return billetRepository.getBilletByEtat(BilletEtat.PAYE);
+    }
+
+    /**
+     * Récupérer tous les billets reservés par un visiteur
+     * @param id
+     * @return
+     */
+    public List<Billet> getBilletsReservesByVisiteur(Long id){
+        Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(()
+                -> new IllegalArgumentException("Visiteur introuvable"));
+        List<Billet> billets = billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESREVE, id);
+        if( billets.isEmpty() ) throw new IllegalArgumentException("Aucun billet reservé");
+        else
+            return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESREVE, id);
+
+    }
+
+    /**
+     * Récupérer tous les billets payés par un visiteur
+     * @param id
+     * @return
+     */
+    public List<Billet> getBilletsPayesByVisiteur(Long id){
+        Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+        List<Billet> billets = billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.PAYE, id);
+        if( billets.isEmpty() ) throw new IllegalArgumentException("Aucun billet payé");
+        else
+            return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.PAYE, id);    }
 }

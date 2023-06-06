@@ -25,17 +25,18 @@ public class Billet {
     @NotNull
     private double prix;
 
-
     private boolean estConfirme;
 
     private boolean estValide;
+
+    @Enumerated(EnumType.STRING)
+    private BilletEtat etat;
 
     @ManyToOne
     private Visiteur visiteur;
 
     @ManyToOne
     private Employe employe;
-
 
 
 }

@@ -1,6 +1,7 @@
 package com.example.miageland.repositories;
 
 import com.example.miageland.entities.Billet;
+import com.example.miageland.entities.BilletEtat;
 import com.example.miageland.entities.Visiteur;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +20,13 @@ public interface BilletRepository extends JpaRepository <Billet, Long> {
 
 
     List<Billet> getBilletByDate(Date date);
+
+    List<Billet> getBilletByEtat(BilletEtat etat);
+
+
+    List<Billet> getBilletByEtatAndVisiteur_Id(BilletEtat etat, Long id);
+
+
 
     Billet deleteBilletByNumBillet(Long numBillet);
 
