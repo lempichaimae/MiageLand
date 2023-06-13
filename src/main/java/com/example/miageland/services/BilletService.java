@@ -2,14 +2,16 @@ package com.example.miageland.services;
 
 import com.example.miageland.entities.Billet;
 import com.example.miageland.entities.BilletEtat;
+import com.example.miageland.entities.Employe;
 import com.example.miageland.entities.Visiteur;
 import com.example.miageland.repositories.BilletRepository;
+import com.example.miageland.repositories.EmployeRepository;
 import com.example.miageland.repositories.VisiteurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -43,7 +45,7 @@ public class BilletService {
 
         return prix;
     }
-
+    @Transactional
     /**
      * Réserver un billet par un visiteur
      * le prix est initialisé à 0 pour une réservation non payée
@@ -54,24 +56,13 @@ public class BilletService {
     public Billet reserverBillet(Long id, LocalDate date) {
         // Récupérer le visiteur à partir de l'ID
         Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
-
         // Créer un nouveau billet
-        Billet billet = new Billet();
-        billet.setDate(date);
-        billet.setPrix(0.0); // Prix initialisé à 0 pour une réservation non payée
-        billet.setVisiteur(visiteur);
-        //non cofirmé tant qu'il est pas payé
-        billet.setEstConfirme(false);
-        billet.setEstValide(false);
-        billet.setEtat(BilletEtat.RESREVE); // Billet réservé, mais non payé
-
+        Billet billet = new Billet(001L,date,0.0,false,false,BilletEtat.RESERVE,visiteur);
         // Enregistrer le billet dans la base de données
         billetRepository.save(billet);
-
         // Ajouter le billet à la liste de billets du visiteur
         visiteur.getBillets().add(billet);
         visiteurRepository.save(visiteur);
-
         return billet;
     }
 
@@ -176,7 +167,7 @@ public class BilletService {
      * @return
      */
     public List<Billet> getBilletsReserves(){
-        return billetRepository.getBilletByEtat(BilletEtat.RESREVE);
+        return billetRepository.getBilletByEtat(BilletEtat.RESERVE);
     }
 
     /**
@@ -195,10 +186,10 @@ public class BilletService {
     public List<Billet> getBilletsReservesByVisiteur(Long id){
         Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(()
                 -> new IllegalArgumentException("Visiteur introuvable"));
-        List<Billet> billets = billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESREVE, id);
+        List<Billet> billets = billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESERVE, id);
         if( billets.isEmpty() ) throw new IllegalArgumentException("Aucun billet reservé");
         else
-            return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESREVE, id);
+            return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESERVE, id);
 
     }
 

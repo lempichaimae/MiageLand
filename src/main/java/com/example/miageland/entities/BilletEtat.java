@@ -7,7 +7,7 @@ package com.example.miageland.entities;
  */
 public enum BilletEtat {
         PAYE,
-        RESREVE,
+    RESERVE,
 
     }
 

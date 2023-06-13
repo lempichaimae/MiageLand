@@ -35,8 +35,4 @@ public class Billet {
     @ManyToOne
     private Visiteur visiteur;
 
-    @ManyToOne
-    private Employe employe;
-
-
 }
