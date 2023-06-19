@@ -1,6 +1,7 @@
 package com.example.miageland.dataloader;
 
 import com.example.miageland.entities.*;
+import com.example.miageland.repositories.ParcRepository;
 import com.example.miageland.services.AttractionService;
 import com.example.miageland.services.BilletService;
 import com.example.miageland.services.EmployeService;
@@ -33,7 +34,9 @@ public class DataLoader
     @Autowired
     private
     BilletService billetService;
-
+    @Autowired
+    private
+    ParcRepository parcRepository;
     private
     Visiteur visiteur1;
 
@@ -48,6 +51,7 @@ public class DataLoader
 
     private
     Employe employee3;
+    private Parc parc;
 
     @Override
     public void
@@ -67,9 +71,14 @@ public class DataLoader
         generateSampleVisiteurs();
 
         generateSampleTickets();
+        generateSampleParc();
 
     }
-
+    private void
+    generateSampleParc(){
+        this.parc = new Parc(1L,4);
+        parcRepository.save(parc);
+    }
     private void
     generateSampleAttractions() {
 
@@ -151,13 +160,19 @@ public class DataLoader
 
         LocalDate
                 comingDate = LocalDate.now().plusDays(5);
-        billetService.reserverBillet(001L,todayDate);
 
-        billetService.payerBillet(001L);
+        try {
+            billetService.reserverBillet(001L,todayDate);
 
-        billetService.reserverBillet(002L,yesterdayDate);
-        billetService.reserverBillet(001L,todayDate);
-        billetService.payerBillet(003L);
+            billetService.payerBillet(001L);
+
+            billetService.reserverBillet(002L,yesterdayDate);
+            billetService.reserverBillet(001L,todayDate);
+            billetService.payerBillet(003L);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
     }
 

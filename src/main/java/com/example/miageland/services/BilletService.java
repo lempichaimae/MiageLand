@@ -3,10 +3,13 @@ package com.example.miageland.services;
 import com.example.miageland.Statistiques.Journalier;
 import com.example.miageland.Statistiques.StatistiquesBillets;
 import com.example.miageland.entities.Billet;
+import com.example.miageland.entities.Parc;
 import com.example.miageland.entities.BilletEtat;
 import com.example.miageland.entities.Visiteur;
 import com.example.miageland.repositories.BilletRepository;
+import com.example.miageland.repositories.ParcRepository;
 import com.example.miageland.repositories.VisiteurRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,17 +18,13 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class BilletService {
 
     private BilletRepository billetRepository;
 
     private VisiteurRepository visiteurRepository;
-
-    @Autowired
-    public BilletService(BilletRepository billetRepository, VisiteurRepository visiteurRepository) {
-        this.billetRepository = billetRepository;
-        this.visiteurRepository = visiteurRepository;
-    }
+    private ParcRepository parcRepository;
 
     /**
      * Générer un prix aléatoire entre 20 et 70 euros pour le billet
@@ -52,9 +51,21 @@ public class BilletService {
      * @param date
      * @return
      */
-    public Billet reserverBillet(Long visiteurId, LocalDate date) {
+    public Billet reserverBillet(Long visiteurId, LocalDate date) throws Exception {
         // Récupérer le visiteur à partir de l'ID
         Visiteur visiteur = visiteurRepository.findById(visiteurId).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+        Parc parc;
+        if (!parcRepository.existsById(1L)) {
+            parc = new Parc(1L, 4);
+            parcRepository.save(parc);
+        }
+        parc = parcRepository.findById(1L).orElseThrow();
+        int nbTicketOfDay = billetRepository.countByDate(date);
+
+        if (nbTicketOfDay + 1 > parc.getJauge()) {
+            throw new Exception("Jauge exceeded");
+        }
+
         // Créer un nouveau billet
         Billet billet = new Billet(date,0.0,false,false,BilletEtat.RESERVE,visiteur);
         // Enregistrer le billet dans la base de données
