@@ -2,6 +2,7 @@ package com.example.miageland.repositories;
 
 import com.example.miageland.entities.Visiteur;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -24,8 +25,6 @@ public interface VisiteurRepository extends JpaRepository <Visiteur,Long> {
 
     Visiteur getVisiteurByEmailAndAndNom(String nom, String email);
 
-
-
-
-
+    @Query("select count(id) from Visiteur")
+    int countAll();
 }

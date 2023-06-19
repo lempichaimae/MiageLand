@@ -153,7 +153,11 @@ public class DataLoader
                 comingDate = LocalDate.now().plusDays(5);
         billetService.reserverBillet(001L,todayDate);
 
+        billetService.payerBillet(001L);
+
         billetService.reserverBillet(002L,yesterdayDate);
+        billetService.reserverBillet(001L,todayDate);
+        billetService.payerBillet(003L);
 
     }
 
