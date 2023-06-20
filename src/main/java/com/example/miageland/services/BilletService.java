@@ -216,9 +216,9 @@ public class BilletService {
             return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.PAYE, id);    }
 
     /**
-     * Retourne le nombre de billets vendu en une date donnée en paramètre
-     * @param date
-     * @return
+     * Retourne un objet StatistiquesBillets avec les données liés aux billets
+     *
+     * @return StatistiquesBillets
      */
     public StatistiquesBillets getStatistiquesBillet() {
         int nbBilletsVendus = this.billetRepository.countByEtat(BilletEtat.PAYE);

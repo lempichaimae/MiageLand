@@ -20,6 +20,11 @@ import java.util.Map;
 public class ParcController {
     private BilletRepository billetRepository;
     private ParcRepository parcRepository;
+    /**
+     * Retourne un objet Parc ayant une jauge qui avec verification de jauge
+     * @param
+     * @return Parc
+     */
     @PatchMapping("/jauge")
     public Parc setJauge(@RequestBody Map<String, String> body) throws Exception{
         int jauge = Integer.parseInt(body.get("jauge"));
