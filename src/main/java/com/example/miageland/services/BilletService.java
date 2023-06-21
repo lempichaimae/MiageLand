@@ -1,30 +1,30 @@
 package com.example.miageland.services;
 
+import com.example.miageland.Statistiques.Journalier;
+import com.example.miageland.Statistiques.StatistiquesBillets;
 import com.example.miageland.entities.Billet;
+import com.example.miageland.entities.Parc;
 import com.example.miageland.entities.BilletEtat;
 import com.example.miageland.entities.Visiteur;
 import com.example.miageland.repositories.BilletRepository;
+import com.example.miageland.repositories.ParcRepository;
 import com.example.miageland.repositories.VisiteurRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class BilletService {
 
     private BilletRepository billetRepository;
 
     private VisiteurRepository visiteurRepository;
-
-    @Autowired
-    public BilletService(BilletRepository billetRepository, VisiteurRepository visiteurRepository) {
-        this.billetRepository = billetRepository;
-        this.visiteurRepository = visiteurRepository;
-    }
+    private ParcRepository parcRepository;
 
     /**
      * Générer un prix aléatoire entre 20 et 70 euros pour le billet
@@ -43,7 +43,7 @@ public class BilletService {
 
         return prix;
     }
-
+    @Transactional
     /**
      * Réserver un billet par un visiteur
      * le prix est initialisé à 0 pour une réservation non payée
@@ -51,27 +51,28 @@ public class BilletService {
      * @param date
      * @return
      */
-    public Billet reserverBillet(Long id, LocalDate date) {
+    public Billet reserverBillet(Long visiteurId, LocalDate date) throws Exception {
         // Récupérer le visiteur à partir de l'ID
-        Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+        Visiteur visiteur = visiteurRepository.findById(visiteurId).orElseThrow(() -> new IllegalArgumentException("Visiteur introuvable"));
+        Parc parc;
+        if (!parcRepository.existsById(1L)) {
+            parc = new Parc(1L, 4);
+            parcRepository.save(parc);
+        }
+        parc = parcRepository.findById(1L).orElseThrow();
+        int nbTicketOfDay = billetRepository.countByDate(date);
+
+        if (nbTicketOfDay + 1 > parc.getJauge()) {
+            throw new Exception("Jauge exceeded");
+        }
 
         // Créer un nouveau billet
-        Billet billet = new Billet();
-        billet.setDate(date);
-        billet.setPrix(0.0); // Prix initialisé à 0 pour une réservation non payée
-        billet.setVisiteur(visiteur);
-        //non cofirmé tant qu'il est pas payé
-        billet.setEstConfirme(false);
-        billet.setEstValide(false);
-        billet.setEtat(BilletEtat.RESREVE); // Billet réservé, mais non payé
-
+        Billet billet = new Billet(date,0.0,false,false,BilletEtat.RESERVE,visiteur);
         // Enregistrer le billet dans la base de données
         billetRepository.save(billet);
-
         // Ajouter le billet à la liste de billets du visiteur
         visiteur.getBillets().add(billet);
         visiteurRepository.save(visiteur);
-
         return billet;
     }
 
@@ -176,7 +177,7 @@ public class BilletService {
      * @return
      */
     public List<Billet> getBilletsReserves(){
-        return billetRepository.getBilletByEtat(BilletEtat.RESREVE);
+        return billetRepository.getBilletByEtat(BilletEtat.RESERVE);
     }
 
     /**
@@ -195,10 +196,10 @@ public class BilletService {
     public List<Billet> getBilletsReservesByVisiteur(Long id){
         Visiteur visiteur = visiteurRepository.findById(id).orElseThrow(()
                 -> new IllegalArgumentException("Visiteur introuvable"));
-        List<Billet> billets = billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESREVE, id);
+        List<Billet> billets = billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESERVE, id);
         if( billets.isEmpty() ) throw new IllegalArgumentException("Aucun billet reservé");
         else
-            return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESREVE, id);
+            return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.RESERVE, id);
 
     }
 
@@ -213,4 +214,30 @@ public class BilletService {
         if( billets.isEmpty() ) throw new IllegalArgumentException("Aucun billet payé");
         else
             return billetRepository.getBilletByEtatAndVisiteur_Id(BilletEtat.PAYE, id);    }
+
+    /**
+     * Retourne un objet StatistiquesBillets avec les données liés aux billets
+     *
+     * @return StatistiquesBillets
+     */
+    public StatistiquesBillets getStatistiquesBillet() {
+        int nbBilletsVendus = this.billetRepository.countByEtat(BilletEtat.PAYE);
+        int nbBilletsReserves = this.billetRepository.countByEtat(BilletEtat.RESERVE);
+        double recetteTotale = this.billetRepository.getRecetteTotale();
+        List<LocalDate> dates = this.billetRepository.getAllDate();
+        HashMap<LocalDate, Journalier> journalier= new HashMap<>();
+        for(LocalDate date : dates){
+            int nbBilletsVendusJour = this.billetRepository.countByDateAndEtat(date,BilletEtat.PAYE);
+            double recette = this.billetRepository.getRecetteByDate(date);
+            Journalier j = new Journalier(nbBilletsVendusJour,recette);
+            journalier.put(date,j);
+        }
+        return new StatistiquesBillets(
+                nbBilletsVendus,
+                nbBilletsReserves,
+                recetteTotale,
+                journalier
+                );
+    }
+
 }

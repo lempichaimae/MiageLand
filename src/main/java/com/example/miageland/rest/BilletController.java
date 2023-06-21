@@ -67,7 +67,7 @@ public class BilletController {
      * @return
      */
     @PostMapping("/reserverBillet")
-    public ResponseEntity<Map<String, Object>> reserverBillet(@RequestParam LocalDate date, @RequestParam Long id) {
+    public ResponseEntity<Map<String, Object>> reserverBillet(@RequestParam LocalDate date, @RequestParam Long id) throws Exception {
         Billet billet = billetService.reserverBillet(id, date);
 
         Map<String, Object> response = new HashMap<>();
@@ -155,5 +155,7 @@ public class BilletController {
 
         return ResponseEntity.ok(billetsInfo);
     }
+
+
 
 }

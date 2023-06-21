@@ -1,8 +1,4 @@
 package com.example.miageland.rest;
-
-import com.example.miageland.entities.Attraction;
-import com.example.miageland.entities.AttractionOuverte;
-import com.example.miageland.entities.Billet;
 import com.example.miageland.entities.Employe;
 import com.example.miageland.services.AttractionService;
 import com.example.miageland.services.BilletService;

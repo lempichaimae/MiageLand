@@ -8,9 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface EmployeRepository extends JpaRepository <Employe, Long> {
-
-    Employe getEmployeById(Long id);
-
     Employe getEmployeByEmail(String email);
 
     Employe getEmployeByNom(String nom);

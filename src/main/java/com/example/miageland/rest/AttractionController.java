@@ -26,14 +26,13 @@ public class AttractionController {
         this.employeService = employeService;
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<Attraction>> getAllAttractions() {
         List<Attraction> attractions = attractionService.getAllAttractions();
         return ResponseEntity.ok(attractions);
     }
-    @PostMapping("/ajout")
+    @PostMapping("/{id}")
     public ResponseEntity<String> ajouterAttraction(@RequestBody Attraction attraction ,@RequestParam String email) {
-//        System.out.println("Valeur de isManager : " + email);
         if(employeService.findByEmail(email).isManager())
         {
             attractionService.ajouterAttraction(attraction);

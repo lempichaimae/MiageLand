@@ -36,7 +36,4 @@ public class Employe {
 
     @OneToMany(mappedBy = "employe")
     private List<Attraction> attractions;
-
-    @OneToMany(mappedBy = "employe")
-    private List<Billet> billets;
 }
