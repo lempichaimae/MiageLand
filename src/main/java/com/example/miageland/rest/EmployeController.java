@@ -1,8 +1,10 @@
 package com.example.miageland.rest;
 
 import com.example.miageland.entities.Attraction;
+import com.example.miageland.entities.AttractionOuverte;
 import com.example.miageland.entities.Billet;
 import com.example.miageland.entities.Employe;
+import com.example.miageland.services.AttractionService;
 import com.example.miageland.services.BilletService;
 import com.example.miageland.services.EmployeService;
 import jakarta.websocket.server.PathParam;
@@ -11,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping ("/employes")
 public class EmployeController {
@@ -18,9 +22,12 @@ public class EmployeController {
     EmployeService employeService;
     BilletService billetService;
 
-    public EmployeController(EmployeService employeService, BilletService billetService) {
+    AttractionService attractionService;
+
+    public EmployeController(EmployeService employeService, BilletService billetService, AttractionService attractionService) {
         this.employeService = employeService;
         this.billetService = billetService;
+        this.attractionService = attractionService;
     }
 
     /**seul le manager peut s'inscrire

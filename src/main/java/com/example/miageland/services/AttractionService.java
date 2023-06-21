@@ -20,6 +20,10 @@ public class AttractionService {
     }
 
 
+    public Attraction getAttraction(Long id) {
+       return attractionRepository.getAttractionById(id);
+    }
+
 
     public void ajouterAttraction(Attraction attraction) {
         // Vérifier si l'attraction existe déjà
