@@ -11,7 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/attractions")
@@ -27,10 +30,21 @@ public class AttractionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Attraction>> getAllAttractions() {
+    public ResponseEntity<List<Map<String, Object>>> getAllAttractions() {
         List<Attraction> attractions = attractionService.getAllAttractions();
-        return ResponseEntity.ok(attractions);
+
+        List<Map<String, Object>> attractionInfos = new ArrayList<>();
+        for (Attraction attraction : attractions) {
+            Map<String, Object> info = new HashMap<>();
+            info.put("id", attraction.getId());
+            info.put("nom", attraction.getNom());
+            info.put("Ouverte", attraction.isEstOuverte());
+            attractionInfos.add(info);
+        }
+
+        return ResponseEntity.ok(attractionInfos);
     }
+
     @PostMapping("/{id}")
     public ResponseEntity<String> ajouterAttraction(@RequestBody Attraction attraction ,@RequestParam String email) {
         if(employeService.findByEmail(email).isManager())
